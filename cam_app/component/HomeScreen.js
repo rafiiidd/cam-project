@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import { View, TextInput, FlatList, StyleSheet, Animated } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import axios from 'axios';
 import CameraList from './CameraList';
-import KameraDetail from './KameraDetail';
+import { CartContext } from './CartContext';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -11,6 +11,7 @@ const HomeScreen = ({ navigation }) => {
     const [cameras, setCameras] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [isSearchFocused, setIsSearchFocused] = useState(false);
+    const { addToCart } = useContext(CartContext);
 
     const searchLabelAnim = useRef(new Animated.Value(15)).current;
 
@@ -58,25 +59,28 @@ const HomeScreen = ({ navigation }) => {
             </View>
             <Tab.Navigator>
                 <Tab.Screen name="ACTION CAMERA">
-                    {() => <CamerasList camera={filteredCameras.filter(camera => camera.jenis === 'ACTION CAM')} navigation={navigation} />}
+                    {() => <CamerasList cameras={filteredCameras.filter(camera => camera.jenis === 'ACTION CAM')} navigation={navigation} addToCart={addToCart} />}
                 </Tab.Screen>
                 <Tab.Screen name="MIRRORLESS">
-                    {() => <CamerasList camera={filteredCameras.filter(camera => camera.jenis === 'MIRRORLESS')} navigation={navigation} />}
+                    {() => <CamerasList cameras={filteredCameras.filter(camera => camera.jenis === 'MIRRORLESS')} navigation={navigation} addToCart={addToCart} />}
                 </Tab.Screen>
                 <Tab.Screen name="DSLR">
-                    {() => <CamerasList camera={filteredCameras.filter(camera => camera.jenis === 'DSLR')} navigation={navigation} />}
+                    {() => <CamerasList cameras={filteredCameras.filter(camera => camera.jenis === 'DSLR')} navigation={navigation} addToCart={addToCart} />}
+                </Tab.Screen>
+                <Tab.Screen name="ALAT">
+                    {() => <CamerasList cameras={filteredCameras.filter(camera => camera.jenis === 'ALAT')} navigation={navigation} addToCart={addToCart} />}
                 </Tab.Screen>
             </Tab.Navigator>
         </View>
     );
 };
 
-const CamerasList = ({ camera, navigation }) => (
+const CamerasList = ({ cameras, navigation, addToCart }) => (
     <FlatList
-        data={camera}
+        data={cameras}
         keyExtractor={(item) => item.id.toString()}
         numColumns={2}
-        renderItem={({ item }) => <CameraList camera={item} onPress={() => navigation.navigate('Kamera Detail', { camera: item })} />}
+        renderItem={({ item }) => <CameraList camera={item} onPress={() => navigation.navigate('Kamera Detail', { camera: item })} handleAddToCart={addToCart} />}
     />
 );
 
@@ -89,7 +93,7 @@ const styles = StyleSheet.create({
         position: 'relative',
         marginBottom: 20,
         marginHorizontal: 15,
-        marginTop: 10
+        marginTop: 10,
     },
     input: {
         borderColor: '#9e9e9e',
